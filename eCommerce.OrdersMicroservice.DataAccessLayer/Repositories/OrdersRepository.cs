@@ -1,8 +1,8 @@
-using eCommerce.DataAccessLayer.Entities;
-using eCommerce.DataAccessLayer.RepositoryContracts;
+using eCommerce.OrdersMicroservice.DataAccessLayer.Entities;
+using eCommerce.OrdersMicroservice.DataAccessLayer.RepositoryContracts;
 using MongoDB.Driver;
 
-namespace eCommerce.DataAccessLayer.Repositories;
+namespace eCommerce.OrdersMicroservice.DataAccessLayer.Repositories;
 
 public class OrdersRepository : IOrdersRepository
 {
@@ -18,6 +18,12 @@ public class OrdersRepository : IOrdersRepository
     public async Task<Order?> AddOrder(Order order)
     {
         order.OrderID = Guid.NewGuid();
+        order._id = order.OrderID;
+
+        foreach (OrderItem orderItem in order.OrderItems)
+        {
+            orderItem._id = Guid.NewGuid();
+        }
 
         await _orders.InsertOneAsync(order);
         return order;
@@ -56,9 +62,13 @@ public class OrdersRepository : IOrdersRepository
     {
         FilterDefinition<Order> filter = Builders<Order>.Filter.Eq(temp => temp.OrderID, order.OrderID);
 
-        var result = await _orders.ReplaceOneAsync(filter, order);
-        if (result.MatchedCount == 0)
+        Order? existingOrder = await _orders.Find(filter).FirstOrDefaultAsync();
+        if (existingOrder == null)
+        {
             return null;
+        }
+        order._id = existingOrder._id;
+        var result = await _orders.ReplaceOneAsync(filter, order);
 
         return order;
     }

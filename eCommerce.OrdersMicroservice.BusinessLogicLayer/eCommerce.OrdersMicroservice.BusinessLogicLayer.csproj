@@ -13,7 +13,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\eCommerce.DataAccessLayer\eCommerce.DataAccessLayer.csproj" />
+      <ProjectReference Include="..\eCommerce.OrdersMicroservice.DataAccessLayer\eCommerce.OrdersMicroservice.DataAccessLayer.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="DTO\" />
+      <Folder Include="Mappers\" />
+      <Folder Include="Validators\" />
     </ItemGroup>
 
 </Project>

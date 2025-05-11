@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\eCommerce.BusinessLogicLayer\eCommerce.BusinessLogicLayer.csproj" />
+      <ProjectReference Include="..\eCommerce.OrdersMicroservice.BusinessLogicLayer\eCommerce.OrdersMicroservice.BusinessLogicLayer.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -2,9 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eCommerce.OrdersMicroservice.API", "eCommerce.OrdersMicroservice.API\eCommerce.OrdersMicroservice.API.csproj", "{D3BAF09B-A655-411F-A8EA-A109B4D9F85C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eCommerce.BusinessLogicLayer", "eCommerce.BusinessLogicLayer\eCommerce.BusinessLogicLayer.csproj", "{23A2D00A-9E51-4379-B660-F14A2CBD9B82}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eCommerce.OrdersMicroservice.BusinessLogicLayer", "eCommerce.OrdersMicroservice.BusinessLogicLayer\eCommerce.OrdersMicroservice.BusinessLogicLayer.csproj", "{23A2D00A-9E51-4379-B660-F14A2CBD9B82}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eCommerce.DataAccessLayer", "eCommerce.DataAccessLayer\eCommerce.DataAccessLayer.csproj", "{0B993448-3919-49E3-B6B9-72EC4257D324}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eCommerce.OrdersMicroservice.DataAccessLayer", "eCommerce.OrdersMicroservice.DataAccessLayer\eCommerce.OrdersMicroservice.DataAccessLayer.csproj", "{0B993448-3919-49E3-B6B9-72EC4257D324}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,6 +1,6 @@
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace eCommerce.DataAccessLayer.Entities;
+namespace eCommerce.OrdersMicroservice.DataAccessLayer.Entities;
 
 public class Order
 {
