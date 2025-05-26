@@ -44,7 +44,7 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=admin
     ports:
-      - "6000:8080"
+      - "6001:8080"
     networks:
       - products-mysql-network
       - ecommerce-network

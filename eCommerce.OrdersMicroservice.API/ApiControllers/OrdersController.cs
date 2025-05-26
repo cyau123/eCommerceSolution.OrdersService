@@ -49,6 +49,15 @@ public class OrdersController : ControllerBase
     List<OrderResponse?> orders = await _ordersService.GetOrdersByCondition(filter);
     return orders;
   }
+  
+  [HttpGet("search/userid/{userID}")]
+  public async Task<IEnumerable<OrderResponse?>> GetOrdersByUserID(Guid userID)
+  {
+    FilterDefinition<Order> filter = Builders<Order>.Filter.Eq(temp => temp.UserID, userID);
+
+    List<OrderResponse?> orders = await _ordersService.GetOrdersByCondition(filter);
+    return orders;
+  }
 
 
   //GET: /api/Orders/search/orderDate/{orderDate}
