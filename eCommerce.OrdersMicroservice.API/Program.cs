@@ -3,6 +3,8 @@ using eCommerce.OrdersMicroservice.DataAccessLayer;
 using FluentValidation.AspNetCore;
 using eCommerce.OrdersMicroservice.API.Middleware;
 using eCommerce.OrdersMicroservice.BusinessLogicLayer.HttpClients;
+using eCommerce.OrdersMicroservice.BusinessLogicLayer.Policies;
+using Polly;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,14 +31,28 @@ builder.Services.AddCors(options => {
     });
 });
 
-// HttpClient
-builder.Services.AddHttpClient<UsersMicroserviceClient>(client => {
-    client.BaseAddress = new Uri($"http://{builder.Configuration["UsersMicroserviceName"]}:{builder.Configuration["UsersMicroservicePort"]}");
-});
 
-builder.Services.AddHttpClient<ProductsMicroserviceClient>(client => {
-    client.BaseAddress = new Uri($"http://{builder.Configuration["ProductsMicroserviceName"]}:{builder.Configuration["ProductsMicroservicePort"]}");
-});
+builder.Services.AddTransient<IUsersMicroservicePolicies, UsersMicroservicePolicies>();
+builder.Services.AddTransient<IProductsMicroservicePolicies, ProductsMicroservicePolicies>();
+builder.Services.AddTransient<IPollyPolicies, PollyPolicies>();
+
+// HttpClient
+builder.Services.AddHttpClient<UsersMicroserviceClient>((sp, client) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    client.BaseAddress = new Uri($"http://{config["UsersMicroserviceName"]}:{config["UsersMicroservicePort"]}");
+}).AddPolicyHandler((sp, _) =>
+    sp.GetRequiredService<IUsersMicroservicePolicies>().GetCombinedPolicy());
+
+builder.Services.AddHttpClient<ProductsMicroserviceClient>((sp, client) =>
+    {
+        var config = sp.GetRequiredService<IConfiguration>();
+        client.BaseAddress = new Uri($"http://{config["ProductsMicroserviceName"]}:{config["ProductsMicroservicePort"]}");
+    })
+    .AddPolicyHandler((sp, _) =>
+        sp.GetRequiredService<IProductsMicroservicePolicies>().GetFallbackPolicy())
+    .AddPolicyHandler((sp, _) =>
+        sp.GetRequiredService<IProductsMicroservicePolicies>().GetBulkheadIsolationPolicy());
 
 var app = builder.Build();
 
