@@ -14,7 +14,7 @@ public class UsersMicroserviceClient
     
     public async Task<UserDTO?> GetUserByUserId(Guid userId)
     {
-        var response = await _httpClient.GetAsync($"/api/users/{userId}");
+        var response = await _httpClient.GetAsync($"/gateway/users/{userId}");
 
         if (!response.IsSuccessStatusCode)
         {

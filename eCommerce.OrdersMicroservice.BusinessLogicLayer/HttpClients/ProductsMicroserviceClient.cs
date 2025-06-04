@@ -38,7 +38,7 @@ public class ProductsMicroserviceClient
             }
             
             // If product is not in cache, make an HTTP request to the Products Microservice
-            HttpResponseMessage response = await _httpClient.GetAsync($"/api/products/search/product-id/{productId}");
+            HttpResponseMessage response = await _httpClient.GetAsync($"/gateway/products/search/product-id/{productId}");
 
             if (!response.IsSuccessStatusCode)
             {
