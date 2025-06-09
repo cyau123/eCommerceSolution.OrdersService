@@ -16,6 +16,11 @@ services:
       - ProductsMicroservicePort=8080
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - RabbitMQ_HostName=rabbitmq
+      - RabbitMQ_UserName=user
+      - RabbitMQ_Password=password
+      - RabbitMQ_Port=5672
+      - RabbitMQ_Products_Exchange=products_exchange
     ports:
       - "7000:8080"
     networks:
@@ -45,6 +50,11 @@ services:
       - MYSQL_DATABASE=ecommerceproductsdatabase
       - MYSQL_USER=root
       - MYSQL_PASSWORD=admin
+      - RabbitMQ_HostName=rabbitmq
+      - RabbitMQ_UserName=user
+      - RabbitMQ_Password=password
+      - RabbitMQ_Port=5672
+      - RabbitMQ_Products_Exchange=products_exchange
     ports:
       - "6001:8080"
     networks:
@@ -114,6 +124,17 @@ services:
       dockerfile: ApiGateway/Dockerfile
     ports:
       - "4000:8080"
+    networks:
+      - ecommerce-network
+        
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
     networks:
       - ecommerce-network
 
