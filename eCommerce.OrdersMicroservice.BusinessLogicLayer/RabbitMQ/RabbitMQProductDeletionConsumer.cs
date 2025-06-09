@@ -40,19 +40,32 @@ public class RabbitMQProductDeletionConsumer : IDisposable, IRabbitMQProductDele
 
   public void Consume()
   {
-    string routingKey = "product.delete";
+    // If ExchangeType is Topic, the routing key can be a pattern like "product.#" to match multiple queues.
+    // (# matches zero or more words, * matches exactly one word). For example, "product.update.*" would match "product.update.name" and "product.update.price".
+    // string routingKey = "product.delete";
+    
+    var headers = new Dictionary<string, object>()
+    {
+      { "x-match", "all" }, // Use "any" to match any of the headers, or "all" to match all headers.
+      { "event", "product.delete" }, // Custom header to identify the type of message.
+      { "RowCount", 1 }
+    };
+    
     string queueName = "orders.product.delete.queue";
 
     //Create exchange
     string exchangeName = _configuration["RabbitMQ_Products_Exchange"]!;
-    _channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Direct, durable: true);
+    // _channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Direct, durable: true);
+    _channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Headers, durable: true);
+    // If ExchangeType is Fanout, we can delete the routing key, as it is not used in that case, or use String.Empty
+    // All message queues bound to the exchange will receive the message, meaning that NameUpdate Consumer will also receive the message.
 
     //Create message queue
     _channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null); //x-message-ttl | x-max-length | x-expired 
 
     //Bind the message to exchange
-    _channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routingKey);
-
+    // _channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routingKey);
+    _channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: string.Empty, arguments: headers);
 
     EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
 
