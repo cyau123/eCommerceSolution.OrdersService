@@ -1,5 +1,7 @@
 using System.Text;
 using System.Text.Json;
+using eCommerce.OrdersMicroservice.BusinessLogicLayer.DTO;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -13,8 +15,9 @@ public class RabbitMQProductNameUpdateConsumer : IDisposable, IRabbitMQProductNa
     private readonly IModel _channel;
     private readonly IConnection _connection;
     private readonly ILogger<RabbitMQProductNameUpdateConsumer> _logger;
+    private readonly IDistributedCache _cache;
     
-    public RabbitMQProductNameUpdateConsumer(IConfiguration configuration,  ILogger<RabbitMQProductNameUpdateConsumer> logger)
+    public RabbitMQProductNameUpdateConsumer(IConfiguration configuration,  ILogger<RabbitMQProductNameUpdateConsumer> logger, IDistributedCache cache)
     {
         _configuration = configuration;
 
@@ -34,6 +37,7 @@ public class RabbitMQProductNameUpdateConsumer : IDisposable, IRabbitMQProductNa
         _connection = connectionFactory.CreateConnection();
 
         _channel = _connection.CreateModel();
+        _cache = cache;
     }
 
     public void Consume()
@@ -43,7 +47,6 @@ public class RabbitMQProductNameUpdateConsumer : IDisposable, IRabbitMQProductNa
         {
             { "x-match", "all" },
             { "event", "product.update" },
-            { "field", "name" },
             { "RowCount", 1 }
         };
         
@@ -62,23 +65,38 @@ public class RabbitMQProductNameUpdateConsumer : IDisposable, IRabbitMQProductNa
 
         EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
 
-        consumer.Received += (sender, args) =>
+        consumer.Received += async (sender, args) =>
         {
             byte[] body = args.Body.ToArray();
             string message = Encoding.UTF8.GetString(body);
 
             if (message != null)
             {
-                ProductNameUpdateMessage? productNameUpdateMessage =
-                    JsonSerializer.Deserialize<ProductNameUpdateMessage>(message);
-                _logger.LogInformation(
-                    $"Product name updated: {productNameUpdateMessage.ProductID}, New name: {productNameUpdateMessage.NewName}");
+                ProductDTO? productDto =
+                    JsonSerializer.Deserialize<ProductDTO>(message);
+
+                if (productDto != null)
+                {
+                    await HandleProductUpdate(productDto);
+                }
+           
             }
         };
 
         _channel.BasicConsume(queue: queueName, consumer: consumer, autoAck: true);
     }
-    
+
+    private async Task HandleProductUpdate(ProductDTO productDTO)
+    {
+        _logger.LogInformation(
+            $"Product name updated: {productDTO.ProductID}, New name: {productDTO.ProductName}");
+        string productJson = JsonSerializer.Serialize(productDTO);
+        DistributedCacheEntryOptions options = new DistributedCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromSeconds(300));
+        
+        string cacheKeyToWrite = $"product:{productDTO.ProductID}";
+        await _cache.SetStringAsync(cacheKeyToWrite, productJson, options);
+    }
     public void Dispose()
     {
         _channel.Dispose();
